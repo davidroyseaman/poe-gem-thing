@@ -1,0 +1,60 @@
+name: on-push # dsx rename
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+
+env:
+  DOCKER_REGISTRY_URL_PREFIX: ghcr.io/${{ github.repository_owner }}
+  KUBECONFIG: kube_config.yaml
+  DOMAIN: k8s.zk.io
+jobs:
+  deployments:
+    needs: infrastructure
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # dsx change this maybe
+      matrix:
+        folder:
+          - poe-gem
+    steps:
+      - uses: actions/checkout@v2
+      - uses: chrisdickinson/setup-yq@latest
+
+      - name: Log into registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Store kubeconfig for kubectl login
+        working-directory: ${{ matrix.folder }}
+        run: 'echo "$KUBE_CONFIG" > kube_config.yaml'
+        shell: bash
+        env:
+          KUBE_CONFIG: ${{secrets.KUBE_CONFIG}}
+
+      - name: Create k8s imagePullSecrets
+        working-directory: ${{ matrix.folder }}
+        run: |
+          kubectl create secret docker-registry ghcr-docker \
+            --docker-server=ghcr.io \
+            --docker-username=${{ github.actor }} \
+            --docker-password=${{ secrets.READ_PACKAGES_PAT }} \
+            --docker-email=anything@something.com \
+            --dry-run=client -o yaml \
+          | kubectl apply -f -
+
+      - name: Build step
+        working-directory: ${{ matrix.folder }}
+        run: |
+          echo ${{ matrix.folder }}: Build
+          if [ -f "./build" ]; then
+            ./build
+          fi
+
+      - name: Deploy step
+        working-directory: ${{ matrix.folder }}
+        run: |
+          echo ${{ matrix.folder }}: Deploy
+          if [ -f "./deploy" ]; then
+            ./deploy
+          fi
