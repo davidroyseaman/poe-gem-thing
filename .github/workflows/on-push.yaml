@@ -11,7 +11,6 @@ env:
   DOMAIN: k8s.zk.io
 jobs:
   deployments:
-    needs: infrastructure
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false # dsx change this maybe
