@@ -122,11 +122,17 @@
         num++;
       });
       window.localStorage.saved = str;
+      window.location.hash = encodeURIComponent(str);
     };
   </script>
   <script type="text/javascript">
     function loadFromLocalstorage(classEl) {
-      var saved = window.localStorage.saved;
+      var saved;
+      if (window.location.hash && window.location.hash.length > 0) {
+        saved = decodeURIComponent(window.location.hash.substring(1));
+      } else {
+        saved = window.localStorage.saved;
+      }
       if (!saved) { return; }
       var content = saved.split(",");
       var str = ""; var num = 0;
