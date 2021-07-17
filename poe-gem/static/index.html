@@ -112,9 +112,49 @@
       background-color: transparent;
     }
   </style>
-  <script
-    type="text/javascript">function selectItem(item) { item.classList.toggle("selected"); if (item.classList.contains("selected")) { item.parentNode.querySelectorAll(".selected").forEach(sibling => { if (sibling != item) { sibling.classList.remove("selected"); } }); } }</script>
-  <script type="text/javascript">function multiSelectItem(item) { item.classList.toggle("selected"); }</script>
+  <script type="text/javascript">
+    function saveToLocalstorage(classEl) {
+      var str = classEl.id.concat(","); var num = 0;
+      classEl.querySelectorAll(".skill").forEach(item2 => {
+        if (item2.classList.contains("selected")) {
+          str = str.concat(num.toString(), ",");
+        }
+        num++;
+      });
+      window.localStorage.saved = str;
+    };
+  </script>
+  <script type="text/javascript">
+    function loadFromLocalstorage(classEl) {
+      var saved = window.localStorage.saved;
+      if (!saved) { return; }
+      var content = saved.split(",");
+      var str = ""; var num = 0;
+      document.getElementById(content[0]).querySelectorAll(".skill").forEach(item => {
+        if (content.includes(num.toString())) { item.classList.add("selected"); }; num++
+      });
+      document.getElementById(content[0].concat("_link")).click();
+      var coll = document.getElementById(content[0]).querySelectorAll("#collapseBtn"); if (coll[0].innerHTML == "Collapse") { coll[0].click(); };
+    };
+    window.addEventListener('load', loadFromLocalstorage);
+  </script>
+  <script type="text/javascript">
+    function selectItem(item) {
+      item.classList.toggle("selected");
+      if (item.classList.contains("selected")) {
+        item.parentNode.querySelectorAll(".selected").forEach(sibling => {
+          if (sibling != item) { sibling.classList.remove("selected"); }
+        });
+      }
+      saveToLocalstorage(item.parentNode.parentNode.parentNode);
+    }
+  </script>
+  <script type="text/javascript">
+    function multiSelectItem(item) {
+      item.classList.toggle("selected");
+      saveToLocalstorage(item.parentNode.parentNode.parentNode);
+    }
+  </script>
   <script
     type="text/javascript">function filterChoices(b) {
         if (b.innerHTML == "Collapse") {
@@ -62125,7 +62165,8 @@
               str = str.concat(num.toString(), ",");
             }
             num++;
-          }); var element = document.createElement('a'); element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(str)); element.setAttribute('download', btn.parentNode.parentNode.id.concat("_build.csv")); element.style.display = 'none'; document.body.appendChild(element); element.click(); document.body.removeChild(element);
+          });
+           var element = document.createElement('a'); element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(str)); element.setAttribute('download', btn.parentNode.parentNode.id.concat("_build.csv")); element.style.display = 'none'; document.body.appendChild(element); element.click(); document.body.removeChild(element);
         });
       })</script>
   <script type="text/javascript">document.querySelectorAll("#readCodeBtn").forEach(btn => {
