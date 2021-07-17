@@ -141,6 +141,7 @@
       });
       document.getElementById(content[0].concat("_link")).click();
       var coll = document.getElementById(content[0]).querySelectorAll("#collapseBtn"); if (coll[0].innerHTML == "Collapse") { coll[0].click(); };
+      saveToLocalstorage(document.getElementById(content[0]));
     };
     window.addEventListener('load', loadFromLocalstorage);
   </script>
